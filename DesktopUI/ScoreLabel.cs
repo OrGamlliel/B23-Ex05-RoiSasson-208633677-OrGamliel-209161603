@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace DesktopUI
+{
+    internal class ScoreLabel : Label
+    {
+        public void ChangeLabelText(int i_NewScore)
+        {
+            this.Text = i_NewScore.ToString();
+        }
+    }
+}
