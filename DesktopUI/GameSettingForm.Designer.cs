@@ -169,6 +169,7 @@ namespace DesktopUI
             // m_startButton
             // 
             this.m_startButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(177)));
+            this.m_startButton.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.m_startButton.Location = new System.Drawing.Point(17, 223);
             this.m_startButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.m_startButton.Name = "m_startButton";

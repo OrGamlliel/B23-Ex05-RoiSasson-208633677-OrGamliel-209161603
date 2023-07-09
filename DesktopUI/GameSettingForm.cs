@@ -58,6 +58,7 @@ namespace DesktopUI
                 checkValues();
 
                 r_Game.InitGame((int)m_numericUpDownRows.Value, !m_PlayerTwoCB.Checked, m_playerOneTB.Text, m_playerTwoTB.Text);
+                r_Game.ResetGame();
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }

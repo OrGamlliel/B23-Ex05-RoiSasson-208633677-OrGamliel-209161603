@@ -13,37 +13,43 @@ namespace Engine
         private bool m_IsGameOver;
         private bool m_IsDraw;
 
+        public Game()
+        {
+        }
+
+        public bool isPlayerTwoComputer
+        {
+            get
+            {
+                return m_IsPlayerTwoComputer;
+            }
+        }
+
+        public bool IsGameOver
+        {
+            get { return m_IsGameOver; }
+        }
+
+        public bool IsDraw
+        {
+            get { return m_IsDraw; }
+        }
+
+        public string CurrPlayerName
+        {
+            get { return m_CurrPlayer.Nickname; }
+        }
+
+        internal List<Tuple<int, int>> EmptyCells
+        {
+            get { return m_EmptyCells; }
+        }
+
         private Player m_PlayerA { get; set; }
 
         private Player m_PlayerB { get; set; }
 
         private int m_StepCounter { get; set; }
-
-        public Game()
-        {
-        }
-
-
-        public void InitGame(int i_BoardSize, bool i_IsPlayerTwoComputer, string playerANickname, string playerBNickname)
-        {
-            m_GameBoard = new Board(i_BoardSize);
-            m_IsPlayerTwoComputer = i_IsPlayerTwoComputer;
-            m_PlayerA = new Player(playerANickname, CellStatus.Player1Symobl, false);
-            if (!m_IsPlayerTwoComputer)
-            {
-                m_PlayerB = new Player(playerBNickname, CellStatus.Player2Symobl, false);
-            }
-            else
-            {
-                m_PlayerB = new Player("AIplayer", CellStatus.Player2Symobl, true);
-                m_EmptyCells = new List<Tuple<int, int>>();
-            }
-
-            m_IsGameOver = false;
-            m_IsDraw = false;
-            m_CurrPlayer = m_PlayerA;
-            m_StepCounter = 0;
-        }
 
         public int GetBoardSize()
         {
@@ -60,51 +66,52 @@ namespace Engine
             return m_PlayerB.Nickname;
         }
 
-        public string CurrPlayerName
+        public void AddPlayerScoreListener(int i_PlayerNum, Action<int> i_Method)
         {
-            get { return m_CurrPlayer.Nickname; }
+            if (i_PlayerNum == 1)
+            {
+                m_PlayerA.r_ScoreAction += i_Method;
+            }
+            else
+            {
+                m_PlayerB.r_ScoreAction += i_Method;
+            }
         }
 
-        public bool IsGameOver
-        {
-            get { return m_IsGameOver; }
-        }
-
-        public bool IsDraw
-        {
-            get { return m_IsDraw; }
-        }
-
-        internal List<Tuple<int, int>> EmptyCells
-        {
-            get { return m_EmptyCells; }
-        }
-
-        public CellStatus GetSymbolInCell(int i_Row, int i_Col)
+        public eCellStatus GetSymbolInCell(int i_Row, int i_Col)
         {
             return m_GameBoard.GetCellSymbol(i_Row, i_Col);
         }
 
-        private void InitializeList()
+        public void InitGame(int i_BoardSize, bool i_IsPlayerTwoComputer, string playerANickname, string playerBNickname)
         {
-            m_EmptyCells.Clear();
-            for (int row = 0; row < m_GameBoard.BoardSize; row++)
+            m_GameBoard = new Board(i_BoardSize);
+            m_IsPlayerTwoComputer = i_IsPlayerTwoComputer;
+            m_PlayerA = new Player(playerANickname, eCellStatus.Player1Symobl, false);
+            if (!m_IsPlayerTwoComputer)
             {
-                for (int col = 0; col < m_GameBoard.BoardSize; col++)
-                {
-                    m_EmptyCells.Add(Tuple.Create(row, col));
-                }
+                m_PlayerB = new Player(playerBNickname, eCellStatus.Player2Symobl, false);
             }
+            else
+            {
+                m_PlayerB = new Player("AIplayer", eCellStatus.Player2Symobl, true);
+                m_EmptyCells = new List<Tuple<int, int>>();
+            }
+
+            m_IsGameOver = false;
+            m_IsDraw = false;
+            m_CurrPlayer = m_PlayerA;
+            m_StepCounter = 0;
         }
 
         public bool MakeMove(int i_Row, int i_Col)
         {
             bool isValidMove = true;
-            bool isLosingSequenceFound = false;
+            bool isLosingSequenceFound;
 
             if (m_GameBoard.IsCellEmpty(i_Row, i_Col))
             {
-                m_GameBoard.SetCell(i_Row, i_Col, m_CurrPlayer.GetSymbol);
+                m_GameBoard.SetCell(i_Row, i_Col, m_CurrPlayer.GetSymbol, false);
                 m_StepCounter++;
 
                 if (m_PlayerB.IsComputer)
@@ -119,11 +126,11 @@ namespace Engine
                     m_IsGameOver = true;
                     if (m_CurrPlayer == m_PlayerA)
                     {
-                        m_PlayerB.Score++;
+                        m_PlayerB.IncrementScore();
                     }
                     else
                     {
-                        m_PlayerA.Score++;
+                        m_PlayerA.IncrementScore();
                     }
                 }
 
@@ -155,7 +162,12 @@ namespace Engine
             return isValidMove;
         }
 
-        public bool CheckForLosingSequence(CellStatus i_PlayerSymbol, int i_PlayerPickingRow, int i_PlayerPickingCol)
+        public void AddHandlerToActionMatrix(int i_Row, int i_Col, Action<eCellStatus> i_Method)
+        {
+            m_GameBoard.AddHandlerToActionMatrix(i_Row, i_Col, i_Method);
+        }
+
+        public bool CheckForLosingSequence(eCellStatus i_PlayerSymbol, int i_PlayerPickingRow, int i_PlayerPickingCol)
         {
             bool isSequence = true;
             i_PlayerPickingRow--;
@@ -235,7 +247,6 @@ namespace Engine
             }
         }
 
-        // $G$ SFN-014 (+10) Bonus: The program Includes AI computer player.
         public void GetComputerMove(out int o_SelsetedRowAI, out int o_SelsetedColAI)
         {
             List<Tuple<int, int>> duplicatedEmptyCellsList = EmptyCells.ToList();
@@ -246,17 +257,17 @@ namespace Engine
 
             foreach (Tuple<int, int> cell in EmptyCells)
             {
-                m_GameBoard.SetCell(cell.Item1 + 1, cell.Item2 + 1, CellStatus.Player2Symobl);
+                m_GameBoard.SetCell(cell.Item1 + 1, cell.Item2 + 1, eCellStatus.Player2Symobl, true);
                 if (m_StepCounter > (m_GameBoard.BoardSize + 1))
                 {
-                    if (CheckForLosingSequence(CellStatus.Player2Symobl, cell.Item1 + 1, cell.Item2 + 1))
+                    if (CheckForLosingSequence(eCellStatus.Player2Symobl, cell.Item1 + 1, cell.Item2 + 1))
                     {
                         cellToRemove = new Tuple<int, int>(cell.Item1, cell.Item2);
                         duplicatedEmptyCellsList.Remove(cellToRemove);
                     }
                 }
 
-                m_GameBoard.SetCell(cell.Item1 + 1, cell.Item2 + 1, CellStatus.Empty);
+                m_GameBoard.SetCell(cell.Item1 + 1, cell.Item2 + 1, eCellStatus.Empty, true);
             }
 
             if (duplicatedEmptyCellsList.Count == 0)
@@ -266,8 +277,20 @@ namespace Engine
 
             randomIndex = random.Next(duplicatedEmptyCellsList.Count);
             randomCell = duplicatedEmptyCellsList[randomIndex];
-            o_SelsetedRowAI = randomCell.Item1 + 1;
-            o_SelsetedColAI = randomCell.Item2 + 1;
+            o_SelsetedRowAI = randomCell.Item1;
+            o_SelsetedColAI = randomCell.Item2;
+        }
+
+        private void InitializeList()
+        {
+            m_EmptyCells.Clear();
+            for (int row = 0; row < m_GameBoard.BoardSize; row++)
+            {
+                for (int col = 0; col < m_GameBoard.BoardSize; col++)
+                {
+                    m_EmptyCells.Add(Tuple.Create(row, col));
+                }
+            }
         }
     }
 }

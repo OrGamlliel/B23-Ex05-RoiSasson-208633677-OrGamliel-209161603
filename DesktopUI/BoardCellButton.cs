@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
+using Engine;
 
 namespace DesktopUI
 {
@@ -11,6 +7,9 @@ namespace DesktopUI
     {
         private readonly int r_Row;
         private readonly int r_Column;
+        private const string k_PlayerOneSymbol = "X";
+        private const string k_PlayerTwoSymbol = "O";
+        private const string k_Empty = "";
 
         public BoardCellButton(int i_Row, int i_Column)
         {
@@ -34,15 +33,28 @@ namespace DesktopUI
             }
         }
 
-        public void changeButtonText(char i_NewText)
+        public void btn_WasClicked(eCellStatus i_NewText)
         {
-            if (i_NewText == ' ')
+
+            if (i_NewText == eCellStatus.Empty)
             {
-                this.Text = "";
+                this.Text = k_Empty;
+                this.Enabled = true;
+                this.BackColor = System.Drawing.Color.White ;
             }
             else
             {
-                this.Text = i_NewText.ToString();
+                if (i_NewText == eCellStatus.Player1Symobl)
+                {
+                    this.Text = k_PlayerOneSymbol;
+                    this.BackColor = System.Drawing.Color.Red;
+                }
+                else
+                {
+                    this.Text = k_PlayerTwoSymbol;
+                    this.BackColor = System.Drawing.Color.Green;
+                }
+                this.Enabled = false;
             }
         }
     }

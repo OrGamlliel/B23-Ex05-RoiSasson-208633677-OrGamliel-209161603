@@ -64,7 +64,7 @@ namespace DesktopUI
             this.Controls.Add(this.m_LabelPlayerOne);
             this.Name = "BoardForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "BoardForm";
+            this.Text = "TicTacToeMisere";
             this.ResumeLayout(false);
             this.PerformLayout();
 

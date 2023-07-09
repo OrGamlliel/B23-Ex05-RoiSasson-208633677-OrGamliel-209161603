@@ -9,7 +9,7 @@ namespace DesktopUI
 {
     internal class ScoreLabel : Label
     {
-        public void ChangeLabelText(int i_NewScore)
+        public void player_ScoreChanged(int i_NewScore)
         {
             this.Text = i_NewScore.ToString();
         }
